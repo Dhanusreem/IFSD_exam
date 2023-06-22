@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Animal Management</title>
+    <script src="https://unpkg.com/react/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      class Animal {
+        constructor(species, initialPopulation, birthRate, deathRate) {
+          this.species = species;
+          this.population = initialPopulation;
+          this.birthRate = birthRate;
+          this.deathRate = deathRate;
+        }
+        calculatePopulationAfterYears(years) {
+          let population = this.population;
+          for (let i = 0; i < years; i++) {
+            population +=
+              population * this.birthRate - population * this.deathRate;
+          }
+          return population;
+        }
+      }
+
+      class Zoo extends React.Component {
+        constructor(props) {
+          super(props);
+          this.state = {
+            animals: [],
+          };
+        }
+
+        addAnimal = () => {
+          const species = prompt("Enter the species of the animal:");
+          const initialPopulation = parseInt(
+            prompt("Enter the initial population of the animal:")
+          );
+          const birthRate = parseFloat(
+            prompt("Enter the birth rate of the animal (e.g., 0.1 for 10%):")
+          );
+          const deathRate = parseFloat(
+            prompt("Enter the death rate of the animal (e.g., 0.05 for 5%):")
+          );
+
+          const animal = new Animal(
+            species,
+            initialPopulation,
+            birthRate,
+            deathRate
+          );
+          this.setState((prevState) => ({
+            animals: [...prevState.animals, animal],
+          }));
+        };
+
+        updateAnimal = (index) => {
+          const { animals } = this.state;
+          const species = prompt("Enter the updated species of the animal:");
+          const initialPopulation = parseInt(
+            prompt("Enter the updated initial population of the animal:")
+          );
+          const birthRate = parseFloat(
+            prompt(
+              "Enter the updated birth rate of the animal (e.g., 0.1 for 10%):"
+            )
+          );
+          const deathRate = parseFloat(
+            prompt(
+              "Enter the updated death rate of the animal (e.g., 0.05 for 5%):"
+            )
+          );
+
+          const updatedAnimal = new Animal(
+            species,
+            initialPopulation,
+            birthRate,
+            deathRate
+          );
+          animals.splice(index, 1, updatedAnimal);
+          this.setState({ animals: [...animals] });
+        };
+
+        deleteAnimal = (index) => {
+          const { animals } = this.state;
+          animals.splice(index, 1);
+          this.setState({ animals: [...animals] });
+        };
+
+        calculateTotalPopulation = () => {
+          const { animals } = this.state;
+          let totalPopulation = 0;
+          for (let animal of animals) {
+            totalPopulation += animal.calculatePopulationAfterYears(1); // Assuming 1 year for simplicity
+          }
+          return totalPopulation;
+        };
+
+        handleMenuSelection = (choice) => {
+          switch (choice) {
+            case "1":
+              this.addAnimal();
+              break;
+            case "2":
+              this.updateAnimal(
+                parseInt(prompt("Enter the index of the animal to update:"))
+              );
+              break;
+            case "3":
+              this.deleteAnimal(
+                parseInt(prompt("Enter the index of the animal to delete:"))
+              );
+              break;
+            case "4":
+              this.setState({
+                totalPopulation: this.calculateTotalPopulation(),
+              });
+              break;
+            default:
+              console.log("Invalid choice!");
+          }
+        };
+
+        render() {
+          const { animals, totalPopulation } = this.state;
+
+          return (
+            <div>
+              <h2>Zoo Management</h2>
+
+              <div>
+                <h3>Options:</h3>
+                <p>1. Add Animal</p>
+                <p>2. Update Animal</p>
+                <p>3. Delete Animal</p>
+                <p>4. Calculate Total Population</p>
+                <p>
+                  Choose an option (1-4): <input type="text" id="menuChoice" />
+                </p>
+                <button
+                  onClick={() =>
+                    this.handleMenuSelection(
+                      document.getElementById("menuChoice").value
+                    )
+                  }
+                >
+                  Submit
+                </button>
+              </div>
+
+              <h3>Animal List</h3>
+              <ul>
+                {animals.map((animal, index) => (
+                  <li key={index}>
+                    Index: {index}, Species: {animal.species}, Population:{" "}
+                    {animal.population}
+                  </li>
+                ))}
+              </ul>
+
+              {totalPopulation && <p>Total Population: {totalPopulation}</p>}
+            </div>
+          );
+        }
+      }
+
+      ReactDOM.render(<Zoo />, document.getElementById("root"));
+    </script>
+  </body>
+</html>
